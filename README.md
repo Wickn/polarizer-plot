@@ -3,6 +3,8 @@
 - Python 3.12 (higher or lower might very well work)
 - MatPlotLib (PyPlot and Animation)
 - NumPy
+- FFMPEG in PATH (If you wish to export to .mp4)
+- Pillow (If you wish to export to .gif)
 ## Features
 Visualize the state of polarization of light as it traverses through a polarizer, calculated through Jones Calculus.
 - Show a 2D representation of the light pre- and post polarization
