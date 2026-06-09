@@ -12,4 +12,5 @@ Visualize the state of polarization of light as it traverses through a polarizer
 - Allows exporting to .gif and .mp4 formats. (Note: .mp4 export requires ffmpeg in PATH)
 - Panning 3D plot to better visualize that the wave propagates in 3 dimensions (NOT recommended if you get seasick)
 ## Usage
-Simply run the script and indicate your desired settings.
+Simply run the script "polarizer plot.py" and indicate your desired settings.
+The notebook file is primarily for testing. The most up to date version is the .py file.
