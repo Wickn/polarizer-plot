@@ -19,7 +19,8 @@ pre_polar = int(input("""Light polarization:
                       \n4: Linear (Vertical)
                       \n5: Linear (45 degrees)
                       \n6: Linear (-45 degrees)
-                      \n7: Linear (Custom rotation)\n""") or 1)
+                      \n7: Linear (Custom)
+                      \n8: Elliptical polarization (Custom)\n""") or 1)
 match pre_polar:
     case 1: # right hand circular
         E0x, E0y = 1/np.sqrt(2)*1, 1/np.sqrt(2)*1j
@@ -35,7 +36,13 @@ match pre_polar:
         E0x, E0y = 1/np.sqrt(2)*1, -1/np.sqrt(2)*1
     case 7: # linear, custom rotation
         phi_custom = int(input("Enter rotation in degrees: ") or 30)
-        E0x, E0y = 1/np.sqrt(2)*np.cos(phi_custom), 1/np.sqrt(2)*np.sin(phi_custom) 
+        E0x, E0y = 1/np.sqrt(2)*np.cos(np.deg2rad(phi_custom)), 1/np.sqrt(2)*np.sin(np.deg2rad(phi_custom)) 
+    case 8: # ellipical, custom
+        psi_custom = int(input("Enter orientation in degrees: ") or 30)
+        chi_custom = int(input("Enter ellipticity in degrees (sign = orientation): ") or 30)
+        E0x, E0y = (
+        (np.cos(np.deg2rad(psi_custom))*np.cos(np.deg2rad(chi_custom)) - 1j*np.sin(np.deg2rad(psi_custom))*np.sin(np.deg2rad(chi_custom))), 
+        (np.sin(np.deg2rad(psi_custom))*np.cos(np.deg2rad(chi_custom)) + 1j*np.cos(np.deg2rad(psi_custom))*np.sin(np.deg2rad(chi_custom))))
 
 post_polar = int(input("""Polarizer:
                       \n1: Right hand circular
@@ -108,7 +115,7 @@ phi = omega * t - k * z0
 
 # physical field
 Ex = E0x * np.exp(1j*(phi + phi_x))
-Ey = E0y * np.exp(1j*(phi + phi_x))
+Ey = E0y * np.exp(1j*(phi + phi_y))
 
 fig, ax = plt.subplots(1, 3, figsize=(13, 4))
 
