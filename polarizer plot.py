@@ -112,6 +112,7 @@ z0 = 0                          # phase / wave number
 T = 2*np.pi/omega
 t = np.linspace(0, 2*T, 1000) # 2 periods
 phi = omega * t - k * z0
+t_normal = t/np.max(t)
 
 # physical field
 Ex = E0x * np.exp(1j*(phi + phi_x))
@@ -128,18 +129,18 @@ Epy = E_polarized[1]
 
 # pre polar
 # 1) Complex Ex: real + imag
-ax[0].plot(t, Ex.real, label='Re(Ex)')
-ax[0].plot(t, Ex.imag, label='Im(Ex)')
+ax[0].plot(t_normal, Ex.real, label='Re(Ex)')
+ax[0].plot(t_normal, Ex.imag, label='Im(Ex)')
 ax[0].set_title('Ex(t) in complex form')
-ax[0].set_xlabel('t')
+ax[0].set_xlabel('Normalized time (t)')
 ax[0].legend()
 ax[0].grid(True, alpha=0.3)
 
 # 2) Complex Ey: real + imag
-ax[1].plot(t, Ey.real, label='Re(Ey)')
-ax[1].plot(t, Ey.imag, label='Im(Ey)')
+ax[1].plot(t_normal, Ey.real, label='Re(Ey)')
+ax[1].plot(t_normal, Ey.imag, label='Im(Ey)')
 ax[1].set_title('Ey(t) in complex form')
-ax[1].set_xlabel('t')
+ax[1].set_xlabel('Normalized time (t)')
 ax[1].legend()
 ax[1].grid(True, alpha=0.3)
 
@@ -160,18 +161,18 @@ plt.draw()
 fig, ax = plt.subplots(1, 3, figsize=(13, 4))
 
 # 1) Complex Epx: real + imag
-ax[0].plot(t, Epx.real, label='Re(Epx)')
-ax[0].plot(t, Epx.imag, label='Im(Epx)')
+ax[0].plot(t_normal, Epx.real, label='Re(Epx)')
+ax[0].plot(t_normal, Epx.imag, label='Im(Epx)')
 ax[0].set_title('Epx(t) in complex form')
-ax[0].set_xlabel('t')
+ax[0].set_xlabel('Normalized time (t)')
 ax[0].legend()
 ax[0].grid(True, alpha=0.3)
 
 # 2) Complex Epy: real + imag
-ax[1].plot(t, Epy.real, label='Re(Epy)')
-ax[1].plot(t, Epy.imag, label='Im(Epy)')
+ax[1].plot(t_normal, Epy.real, label='Re(Epy)')
+ax[1].plot(t_normal, Epy.imag, label='Im(Epy)')
 ax[1].set_title('Epy(t) in complex form')
-ax[1].set_xlabel('t')
+ax[1].set_xlabel('Normalized time (t)')
 ax[1].legend()
 ax[1].grid(True, alpha=0.3)
 
@@ -262,7 +263,7 @@ ax_left.plot_surface(
 # axis labels
 ax_left.set_xlabel("Ex / Epx")
 ax_left.set_ylabel("Ey / Epy", labelpad=10)
-ax_left.set_zlabel("Normalized time")
+ax_left.set_zlabel("Normalized time (t)")
 ax_left.set_title("Polarization in 3D")
 ax_left.legend()
 
