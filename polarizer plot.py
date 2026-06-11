@@ -106,7 +106,7 @@ frequency = c / wavelength      # hz
 omega = 2 * np.pi * frequency   # rad/s
 k = 2*np.pi/1                   # rad/m (example wavelegnth lambda = 1) 
                                 #(i forgot what lambda does in this case but we get 2 periods at 1 and it looks good)
-z0 = 0
+z0 = 0                          # phase / wave number
 
 # time
 T = 2*np.pi/omega
@@ -240,16 +240,18 @@ ax_left.set_zlim(0.0, zmax)
 ax_left.set_box_aspect((2 * lim, 2 * lim, zmax))
 ax_left.set_anchor("E")
 
+# 3D axis
 ax_left.quiver(-lim, 0, 0,  2 * lim, 0, 0, color="k", arrow_length_ratio=0.05, alpha=0.5)
 ax_left.quiver(0, -lim, 0,  0, 2 * lim, 0, color="k", arrow_length_ratio=0.05, alpha=0.5)
 ax_left.quiver(0, 0, 0, 0, 0, zmax, color="k", arrow_length_ratio=0.05, alpha=0.5)
 
+# represents the polarizer
 x_plane = np.linspace(-0.75, 0.75, 2)
 y_plane = np.linspace(-0.75, 0.75, 2)
 X_plane, Y_plane = np.meshgrid(x_plane, y_plane)
 Z_plane = np.ones_like(X_plane)
 
-ax_left.plot_surface( # represents the polarizer
+ax_left.plot_surface( 
     X_plane, Y_plane, Z_plane,
     color="gray",
     alpha=0.15,
@@ -257,24 +259,15 @@ ax_left.plot_surface( # represents the polarizer
     shade=False,
 )
 
+# axis labels
 ax_left.set_xlabel("Ex / Epx")
 ax_left.set_ylabel("Ey / Epy", labelpad=10)
 ax_left.set_zlabel("Normalized time")
 ax_left.set_title("Polarization in 3D")
 ax_left.legend()
 
-# animations
+# animation parameters
 frame_idx = np.arange(0, len(Ex), step)
-
-periods = 2
-def wave(E0x, E0y, z_axis, t):
-    phase = omega * t - periods * k * z_axis
-    x = np.real(E0x * np.exp(1j * (phase + phi_x)))
-    y = np.real(E0y * np.exp(1j * (phase + phi_y)))
-    return x, y
-
-E0x_post = Epx[0]
-E0y_post = Epy[0]
 
 n = len(frame_idx)
 half = n // 2
@@ -300,6 +293,19 @@ if panning == 2:
 else:    
     ax_left.view_init(elev=elev_default, azim=azim_default, roll=roll_default)  # default position
 
+# wave function
+periods = 2
+def wave(E0x, E0y, z_axis, t):
+    phase = omega * t - periods * k * z_axis
+    x = np.real(E0x * np.exp(1j * (phase + phi_x)))
+    y = np.real(E0y * np.exp(1j * (phase + phi_y)))
+    return x, y
+
+# initial first position
+E0x_post = Epx[0]
+E0y_post = Epy[0]
+
+# update animation
 def update(i):
     k = frame_idx[i]
     t_i = t[k]
@@ -319,6 +325,7 @@ def update(i):
 
 ani = animation.FuncAnimation(fig=fig, func=update, frames=len(frame_idx), interval=1000/fps, blit=False)
 
+# choose output file type
 match animation_mode:
     case 2: 
         print("Saving video animation, please wait up to 1 minute...")
