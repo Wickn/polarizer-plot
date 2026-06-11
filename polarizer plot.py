@@ -23,26 +23,26 @@ pre_polar = int(input("""Light polarization:
                       \n8: Elliptical polarization (Custom)\n""") or 1)
 match pre_polar:
     case 1: # right hand circular
-        E0x, E0y = 1/np.sqrt(2)*1, 1/np.sqrt(2)*1j
+        E0x, E0y = 1, 1j
     case 2: # left hand circular
-        E0x, E0y = 1/np.sqrt(2)*1, 1/np.sqrt(2)*-1j
+        E0x, E0y = 1, -1j
     case 3: # linear, horizontal
         E0x, E0y = 1, 0
     case 4: # linear, vertical
         E0x, E0y = 0, 1
     case 5: # linear, 45 degrees
-        E0x, E0y = 1/np.sqrt(2)*1, 1/np.sqrt(2)*1 
+        E0x, E0y = 1, 1 
     case 6: # linear, -45 degrees
-        E0x, E0y = 1/np.sqrt(2)*1, -1/np.sqrt(2)*1
+        E0x, E0y = 1, -1
     case 7: # linear, custom rotation
-        phi_custom = int(input("Enter rotation in degrees: ") or 30)
-        E0x, E0y = 1/np.sqrt(2)*np.cos(np.deg2rad(phi_custom)), 1/np.sqrt(2)*np.sin(np.deg2rad(phi_custom)) 
+        phi_custom = np.deg2rad(int(input("Enter rotation in degrees: ") or 30))
+        E0x, E0y = np.cos(phi_custom), np.sin(phi_custom)
     case 8: # ellipical, custom
-        psi_custom = int(input("Enter orientation in degrees: ") or 30)
-        chi_custom = int(input("Enter ellipticity in degrees (sign = orientation): ") or 30)
+        psi_custom = np.deg2rad(int(input("Enter orientation in degrees: ") or 30))
+        chi_custom = (int(input("Enter ellipticity in degrees (sign = orientation): ") or 30))
         E0x, E0y = (
-        (np.cos(np.deg2rad(psi_custom))*np.cos(np.deg2rad(chi_custom)) - 1j*np.sin(np.deg2rad(psi_custom))*np.sin(np.deg2rad(chi_custom))), 
-        (np.sin(np.deg2rad(psi_custom))*np.cos(np.deg2rad(chi_custom)) + 1j*np.cos(np.deg2rad(psi_custom))*np.sin(np.deg2rad(chi_custom))))
+        (np.cos(psi_custom)*np.cos(chi_custom) - 1j*np.sin(psi_custom)*np.sin(chi_custom)), 
+        (np.sin(psi_custom)*np.cos(chi_custom) + 1j*np.cos(psi_custom)*np.sin(chi_custom)))
 
 post_polar = int(input("""Polarizer:
                       \n1: Right hand circular
@@ -78,7 +78,7 @@ match post_polar:
             [1, -1],
             [-1, 1]])
     case 7: # linear, custom rotation
-        phi_custom = int(input("Enter rotation in degrees: ") or 30)
+        phi_custom = np.deg2rad(int(input("Enter rotation in degrees: ") or 30))
         JM = np.array([
             [np.cos(phi_custom)*np.cos(phi_custom), np.cos(phi_custom)*np.sin(phi_custom)],
             [np.cos(phi_custom)*np.sin(phi_custom), np.sin(phi_custom)*np.sin(phi_custom)]])
