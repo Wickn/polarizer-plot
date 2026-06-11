@@ -119,6 +119,14 @@ Ey = E0y * np.exp(1j*(phi + phi_y))
 
 fig, ax = plt.subplots(1, 3, figsize=(13, 4))
 
+# polarized light
+JV = np.array([Ex, Ey])
+
+E_polarized = JM.dot(JV)
+Epx = E_polarized[0]
+Epy = E_polarized[1]
+
+# pre polar
 # 1) Complex Ex: real + imag
 ax[0].plot(t, Ex.real, label='Re(Ex)')
 ax[0].plot(t, Ex.imag, label='Im(Ex)')
@@ -148,12 +156,7 @@ plt.tight_layout()
 plt.show(block=False)
 plt.draw()
 
-JV = np.array([Ex, Ey])
-
-E_polarized = JM.dot(JV)
-Epx = E_polarized[0]
-Epy = E_polarized[1]
-
+# post polar
 fig, ax = plt.subplots(1, 3, figsize=(13, 4))
 
 # 1) Complex Epx: real + imag
@@ -185,6 +188,7 @@ plt.tight_layout()
 plt.show(block=False)
 plt.draw()
 
+# animated plots
 # layout
 fig = plt.figure(figsize=(13, 8), dpi=125)
 gs = fig.add_gridspec(2, 2, width_ratios=[2.45, 1.35], wspace=0.03, hspace=0.32)
@@ -245,7 +249,7 @@ y_plane = np.linspace(-0.75, 0.75, 2)
 X_plane, Y_plane = np.meshgrid(x_plane, y_plane)
 Z_plane = np.ones_like(X_plane)
 
-ax_left.plot_surface(
+ax_left.plot_surface( # represents the polarizer
     X_plane, Y_plane, Z_plane,
     color="gray",
     alpha=0.15,
@@ -259,7 +263,7 @@ ax_left.set_zlabel("Normalized time")
 ax_left.set_title("Polarization in 3D")
 ax_left.legend()
 
-# update animations
+# animations
 frame_idx = np.arange(0, len(Ex), step)
 
 periods = 2
@@ -275,6 +279,7 @@ E0y_post = Epy[0]
 n = len(frame_idx)
 half = n // 2
 
+# panning
 elev_default = 160
 azim_default = 150
 roll_default = 80
