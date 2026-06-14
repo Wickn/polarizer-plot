@@ -39,7 +39,7 @@ match pre_polar:
         E0x, E0y = np.cos(phi_custom), np.sin(phi_custom)
     case 8: # ellipical, custom
         psi_custom = np.deg2rad(int(input("Enter orientation in degrees: ") or 30))
-        chi_custom = (int(input("Enter ellipticity in degrees (sign = orientation): ") or 30))
+        chi_custom = np.deg2rad(int(input("Enter ellipticity in degrees (sign = orientation): ") or 30))
         E0x, E0y = (
         (np.cos(psi_custom)*np.cos(chi_custom) - 1j*np.sin(psi_custom)*np.sin(chi_custom)), 
         (np.sin(psi_custom)*np.cos(chi_custom) + 1j*np.cos(psi_custom)*np.sin(chi_custom)))
