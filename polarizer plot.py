@@ -7,7 +7,6 @@ import matplotlib.animation as animation
 
 import matplotlib 
 matplotlib.rcParams['animation.embed_limit'] = 2**128
-
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 # user inputs
@@ -16,7 +15,12 @@ mode = int(input("""1: Default settings
 
 match mode:
     case 0: #FOR TESTING STOKES
-        E0x, E0y = 1, 1j
+        E0x, E0y = 1, 1
+        psi_custom = np.deg2rad(int(input("Enter orientation in degrees: ") or 30))
+        chi_custom = np.deg2rad(int(input("Enter ellipticity in degrees (sign = orientation): ") or 30))
+        E0x, E0y = (
+        (np.cos(psi_custom)*np.cos(chi_custom) - 1j*np.sin(psi_custom)*np.sin(chi_custom)), 
+        (np.sin(psi_custom)*np.cos(chi_custom) + 1j*np.cos(psi_custom)*np.sin(chi_custom)))
         JM = np.array([
                     [0, 0],
                     [0, 1]])
@@ -375,3 +379,60 @@ if plot_selection in [1, 4]:
     S3 = 2 * np.imag(np.conjugate(E0x) * E0y)
     SV = np.array([S0/S0, S1/S0, S2/S0, S3/S0])
     print(SV)
+
+    fig = plt.figure(figsize=(8, 8))
+    ax = fig.add_subplot(111, projection="3d")
+
+    theta = np.linspace(0, 2 * np.pi, 120)
+    phi = np.linspace(0, np.pi, 60)
+    theta, phi = np.meshgrid(theta, phi)
+
+    r = 1.0
+    x = r * np.cos(theta) * np.sin(phi)
+    y = r * np.sin(theta) * np.sin(phi)
+    z = r * np.cos(phi)
+
+    # sphere
+    ax.plot_surface(x, y, z, alpha=0.05, linewidth=0.25, color="black", edgecolor="black", antialiased=True, shade=False)
+
+    # stokes vector
+    ax.quiver(0, 0, 0, SV[1], SV[2], SV[3], color="red", arrow_length_ratio=0.1)
+
+    # axis
+    ax.quiver(-1, 0, 0,  2 * 1, 0, 0, color="k", arrow_length_ratio=0, alpha=0.5)
+    ax.quiver(0, -1, 0,  0, 2 * 1, 0, color="k", arrow_length_ratio=0, alpha=0.5)
+    ax.quiver(0, 0, -1, 0, 0, 2 * 1, color="k", arrow_length_ratio=0, alpha=0.5)
+
+    # circles
+    x_xy = r * np.cos(theta)
+    y_xy = r * np.sin(theta)
+    z_xy = np.full_like(theta, 0) # Constant Z
+    ax.plot(x_xy, y_xy, z_xy, label='Parallel to XY plane', color='red', alpha=0.25)
+
+    x_xz = r * np.cos(theta)
+    y_xz = np.full_like(theta, 0) # Constant Y
+    z_xz = r * np.sin(theta)
+    ax.plot(x_xz, y_xz, z_xz, label='Parallel to XZ plane', color='green', alpha=0.25)
+
+    x_xz = np.full_like(theta, 0) # Constant X
+    y_xz = r * np.cos(theta)
+    z_xz = r * np.sin(theta)
+    ax.plot(x_xz, y_xz, z_xz, label='Parallel to YZ plane', color='blue', alpha=0.25)
+
+    # limits
+    ax.set_box_aspect((1, 1, 1))
+    ax.set_xlim(-1, 1)
+    ax.set_ylim(-1, 1)
+    ax.set_zlim(-1, 1)
+    ax.view_init(elev=15, azim=-20, roll=None)
+
+    # useful for determining view_init
+    # %matplotlib qt
+    #def update_view(event):
+    #    fig.suptitle(f"elev={ax.elev:.1f}, azim={ax.azim:.1f}, roll={ax.roll:.1f}")
+    #    fig.canvas.draw_idle()
+    #    fig.canvas.mpl_connect("motion_notify_event", update_view)
+    #    fig.canvas.mpl_connect("button_release_event", update_view)
+
+    plt.tight_layout()
+    plt.show()
