@@ -15,6 +15,12 @@ mode = int(input("""1: Default settings
           \n2: Custom settings\n""") or 1)
 
 match mode:
+    case 0: #FOR TESTING STOKES
+        E0x, E0y = 1, 1j
+        JM = np.array([
+                    [0, 0],
+                    [0, 1]])
+        plot_selection = 4
     case 1:
         E0x, E0y = 1, 1j
         JM = np.array([
@@ -24,6 +30,12 @@ match mode:
 
     case 2:
         print("Leave empty for default values\n")
+        plot_selection = int(input("""Choose what plots to display:
+                                   \n1: All plots
+                                   \n2: 2D polarizations only
+                                   \n3: Animated plot only
+                                   \n4: Poincaré Sphere only\n""") or 1)
+        
         pre_polar = int(input("""Light polarization:
                             \n1: Right hand circular
                             \n2: Left hand circular
@@ -95,11 +107,6 @@ match mode:
                     [np.cos(phi_custom)*np.cos(phi_custom), np.cos(phi_custom)*np.sin(phi_custom)],
                     [np.cos(phi_custom)*np.sin(phi_custom), np.sin(phi_custom)*np.sin(phi_custom)]])
 
-        plot_selection = int(input("""Choose what plots to display:
-                                   \n1: All plots
-                                   \n2: 2D polarizations only
-                                   \n3: Animated plot only
-                                   \n4: Poincaré Sphere only\n""") or 1)
         if plot_selection in [1, 3]:
             animation_mode = int(input("""Choose animation output: 
                                     \n1: MatPlotLib interactive
@@ -362,4 +369,9 @@ if plot_selection in [1, 3]:
     plt.draw()
 
 if plot_selection in [1, 4]:
-    print()
+    S0 = np.abs(E0x)**2 + np.abs(E0y)**2
+    S1 = np.abs(E0x)**2 - np.abs(E0y)**2
+    S2 = 2 * np.real(np.conjugate(E0x) * E0y)
+    S3 = 2 * np.imag(np.conjugate(E0x) * E0y)
+    SV = np.array([S0/S0, S1/S0, S2/S0, S3/S0])
+    print(SV)
