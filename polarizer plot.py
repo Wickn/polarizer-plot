@@ -154,6 +154,43 @@ E_polarized = JM.dot(JV)
 Epx = E_polarized[0]
 Epy = E_polarized[1]
 
+# jones vector to stokes parameters
+def jones2stokes(Ex, Ey):
+    S0 = np.abs(Ex)**2 + np.abs(Ey)**2
+    S1 = np.abs(Ex)**2 - np.abs(Ey)**2
+    S2 = 2 * np.real(np.conjugate(Ex) * Ey)
+    S3 = 2 * np.imag(np.conjugate(Ex) * Ey)
+    return np.array([S0, S1/S0, S2/S0, S3/S0], dtype=float)
+SV = jones2stokes(E0x, E0y)
+
+# stokes to jones vector
+def stokes2jones(SV):
+    S0, S1, S2, S3 = SV[0], SV[1], SV[2], SV[3]
+    # S0 will always be = 1 because of normalization, so i won't be doing handling zero/nonzero cases
+
+    if S1 >= 0:
+        Ex = np.sqrt((1 + S1) / 2)
+        Ey = (S2 + 1j * S3) / (2 * Ex) if not np.isclose(Ex, 0.0) else 0.0j # handles division by 0 cases
+    else:
+        Ey = np.sqrt((1 - S1) / 2)
+        Ex = (S2 - 1j * S3) / (2 * Ey) if not np.isclose(Ey, 0.0) else 0.0j
+
+    return np.sqrt(S0) * np.array([Ex, Ey], dtype=complex)
+jonesreconstructed = stokes2jones(SV)
+
+# test cases to prove the black magic fuckery works somehow
+"""print(f"Ex and Ey in jones: {E0x, E0y}")
+print(f"stokes paramter: {SV}")
+print(f"Ex and Ey reconstructed: {jonesreconstructed[0], jonesreconstructed[1]}")
+print(f"stokes reconstructed: {jones2stokes(jonesreconstructed[0], jonesreconstructed[1])}")
+
+Ex_rec = jonesreconstructed[0] * np.exp(1j*(phi + phi_x))
+Ey_rec = jonesreconstructed[1] * np.exp(1j*(phi + phi_x))
+
+plt.plot(Ex.real, Ey.real)
+plt.plot(Ex_rec.real, Ey_rec.real, '--')
+plt.plot()"""
+
 # 2D plots
 if plot_selection in [1, 2]:
     # pre polar
