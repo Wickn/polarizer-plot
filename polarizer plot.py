@@ -179,6 +179,7 @@ if plot_selection in [1, 2]:
     ax[2].set_title('Physical polarization: Re(Ey) vs Re(Ex)')
     ax[2].set_xlabel('Re(Ex)')
     ax[2].set_ylabel('Re(Ey)')
+    ax[2].set_box_aspect(1)
     ax[2].axis('equal')
     ax[2].grid(True, alpha=0.3)
 
@@ -211,6 +212,7 @@ if plot_selection in [1, 2]:
     ax[2].set_title('Physical polarization: Re(Epy) vs Re(Epx)')
     ax[2].set_xlabel('Re(Epx)')
     ax[2].set_ylabel('Re(Epy)')
+    ax[2].set_box_aspect(1)
     ax[2].axis('equal')
     ax[2].grid(True, alpha=0.3)
 
@@ -372,6 +374,7 @@ if plot_selection in [1, 3]:
     plt.show()
     plt.draw()
 
+# poincaré and stokes
 if plot_selection in [1, 4]:
     S0 = np.abs(E0x)**2 + np.abs(E0y)**2
     S1 = np.abs(E0x)**2 - np.abs(E0y)**2
@@ -380,8 +383,12 @@ if plot_selection in [1, 4]:
     SV = np.array([S0/S0, S1/S0, S2/S0, S3/S0])
     print(SV)
 
-    fig = plt.figure(figsize=(8, 8))
-    ax = fig.add_subplot(111, projection="3d")
+    fig = plt.figure(figsize=(12, 6))
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.4, 1], wspace=0.25)
+    fig.subplots_adjust(left=0.0, right=0.97, bottom=0.0, top=1.0, hspace=0.2, wspace=0.2)
+
+    ax_left = fig.add_subplot(gs[0, 0], projection="3d")
+    ax_right = fig.add_subplot(gs[0, 1])
 
     theta = np.linspace(0, 2 * np.pi, 120)
     phi = np.linspace(0, np.pi, 60)
@@ -393,38 +400,38 @@ if plot_selection in [1, 4]:
     z = r * np.cos(phi)
 
     # sphere
-    ax.plot_surface(x, y, z, alpha=0.05, linewidth=0.25, color="black", edgecolor="black", antialiased=True, shade=False)
+    ax_left.plot_surface(x, y, z, alpha=0.05, linewidth=0.25, color="black", edgecolor="black", antialiased=True, shade=False)
 
     # stokes vector
-    ax.quiver(0, 0, 0, SV[1], SV[2], SV[3], color="red", arrow_length_ratio=0.1)
+    ax_left.quiver(0, 0, 0, SV[1], SV[2], SV[3], color="red", arrow_length_ratio=0.1)
 
     # axis
-    ax.quiver(-1, 0, 0,  2 * 1, 0, 0, color="k", arrow_length_ratio=0, alpha=0.5)
-    ax.quiver(0, -1, 0,  0, 2 * 1, 0, color="k", arrow_length_ratio=0, alpha=0.5)
-    ax.quiver(0, 0, -1, 0, 0, 2 * 1, color="k", arrow_length_ratio=0, alpha=0.5)
+    ax_left.quiver(-1, 0, 0,  2 * 1, 0, 0, color="k", arrow_length_ratio=0, alpha=0.5)
+    ax_left.quiver(0, -1, 0,  0, 2 * 1, 0, color="k", arrow_length_ratio=0, alpha=0.5)
+    ax_left.quiver(0, 0, -1, 0, 0, 2 * 1, color="k", arrow_length_ratio=0, alpha=0.5)
 
     # circles
     x_xy = r * np.cos(theta)
     y_xy = r * np.sin(theta)
     z_xy = np.full_like(theta, 0) # Constant Z
-    ax.plot(x_xy, y_xy, z_xy, label='Parallel to XY plane', color='red', alpha=0.25)
+    ax_left.plot(x_xy, y_xy, z_xy, label='Parallel to XY plane', color='red', alpha=0.25)
 
     x_xz = r * np.cos(theta)
     y_xz = np.full_like(theta, 0) # Constant Y
     z_xz = r * np.sin(theta)
-    ax.plot(x_xz, y_xz, z_xz, label='Parallel to XZ plane', color='green', alpha=0.25)
+    ax_left.plot(x_xz, y_xz, z_xz, label='Parallel to XZ plane', color='green', alpha=0.25)
 
     x_xz = np.full_like(theta, 0) # Constant X
     y_xz = r * np.cos(theta)
     z_xz = r * np.sin(theta)
-    ax.plot(x_xz, y_xz, z_xz, label='Parallel to YZ plane', color='blue', alpha=0.25)
+    ax_left.plot(x_xz, y_xz, z_xz, label='Parallel to YZ plane', color='blue', alpha=0.25)
 
     # limits
-    ax.set_box_aspect((1, 1, 1))
-    ax.set_xlim(-1, 1)
-    ax.set_ylim(-1, 1)
-    ax.set_zlim(-1, 1)
-    ax.view_init(elev=15, azim=-20, roll=None)
+    ax_left.set_box_aspect((1, 1, 1))
+    ax_left.set_xlim(-1, 1)
+    ax_left.set_ylim(-1, 1)
+    ax_left.set_zlim(-1, 1)
+    ax_left.view_init(elev=15, azim=-20, roll=None)
 
     # useful for determining view_init
     # %matplotlib qt
@@ -434,5 +441,14 @@ if plot_selection in [1, 4]:
     #    fig.canvas.mpl_connect("motion_notify_event", update_view)
     #    fig.canvas.mpl_connect("button_release_event", update_view)
 
-    plt.tight_layout()
+    ax_right.plot(Ex.real, Ey.real)
+    ax_right.set_xlim(-1, 1)
+    ax_right.set_ylim(-1, 1)
+    ax_right.set_box_aspect(1)
+    ax_right.set_title('Physical polarization: Re(Ey) vs Re(Ex)')
+    ax_right.set_xlabel('Re(Ex)')
+    ax_right.set_ylabel('Re(Ey)')
+    ax_right.axis('equal')
+    ax_right.grid(True, alpha=0.3)
+
     plt.show()
