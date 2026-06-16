@@ -24,7 +24,7 @@ match mode:
         JM = np.array([
                     [0, 0],
                     [0, 1]])
-        plot_selection = 4
+        animation_mode, panning, pan_span, fps, step, plot_selection = 1, 1, 10.0, 50, 4, 4
     case 1:
         E0x, E0y = 1, 1j
         JM = np.array([
@@ -111,7 +111,7 @@ match mode:
                     [np.cos(phi_custom)*np.cos(phi_custom), np.cos(phi_custom)*np.sin(phi_custom)],
                     [np.cos(phi_custom)*np.sin(phi_custom), np.sin(phi_custom)*np.sin(phi_custom)]])
 
-        if plot_selection in [1, 3]:
+        if plot_selection in [1, 3, 4]:
             animation_mode = int(input("""Choose animation output: 
                                     \n1: MatPlotLib interactive
                                     \n2: .gif (Need package Pillow)
@@ -258,7 +258,7 @@ if plot_selection in [1, 2]:
     plt.show(block=False)
     plt.draw()
 
-# animated plots
+# animated polarizer plot
 if plot_selection in [1, 3]:
     # layout
     fig = plt.figure(figsize=(13, 8), dpi=125)
@@ -399,17 +399,16 @@ if plot_selection in [1, 3]:
     # choose output file type
     match animation_mode:
         case 2: 
-            print("Saving video animation, please wait up to 1 minute...")
+            print("Saving video animation, please allow a few minutes ...")
             ani.save(f"{dir_path}/polarizer.gif", writer="pillow")
             plt.close(fig)
             print(f"Saved in {dir_path}/polarizer.gif")
         case 3:
-            print("Saving video animation, please wait up to 1 minute ...")
+            print("Saving video animation, please allow a few minutes  ...")
             ani.save(f"{dir_path}/polarizer.mp4", writer="ffmpeg")
             plt.close(fig)
             print(f"Saved in {dir_path}/polarizer.mp4")
     plt.show()
-    plt.draw()
 
 # poincaré and stokes
 if plot_selection in [1, 4]:
@@ -493,6 +492,8 @@ if plot_selection in [1, 4]:
     ax_left = fig.add_subplot(gs[0, 0], projection="3d")
     ax_right = fig.add_subplot(gs[0, 1])
 
+    ### 3D plot
+    # sphere paramters
     theta = np.linspace(0, 2 * np.pi, 120)
     phi = np.linspace(0, np.pi, 60)
     theta, phi = np.meshgrid(theta, phi)
@@ -505,13 +506,10 @@ if plot_selection in [1, 4]:
     # sphere
     ax_left.plot_surface(x, y, z, alpha=0.05, linewidth=0.25, color="black", edgecolor="black", antialiased=True, shade=False)
 
-    # stokes vector
-    ax_left.quiver(0, 0, 0, SV[1], SV[2], SV[3], color="red", arrow_length_ratio=0.1)
-
     # axis
-    ax_left.quiver(-1, 0, 0,  2 * 1, 0, 0, color="k", arrow_length_ratio=0, alpha=0.5)
-    ax_left.quiver(0, -1, 0,  0, 2 * 1, 0, color="k", arrow_length_ratio=0, alpha=0.5)
-    ax_left.quiver(0, 0, -1, 0, 0, 2 * 1, color="k", arrow_length_ratio=0, alpha=0.5)
+    ax_left.quiver(-1,  0,  0,  2, 0, 0, color="k", arrow_length_ratio=0, alpha=0.5)
+    ax_left.quiver( 0, -1,  0,  0, 2 ,0, color="k", arrow_length_ratio=0, alpha=0.5)
+    ax_left.quiver( 0,  0, -1,  0, 0, 2, color="k", arrow_length_ratio=0, alpha=0.5)
 
     # circles
     x_xy = r * np.cos(theta)
@@ -535,18 +533,13 @@ if plot_selection in [1, 4]:
     ax_left.set_ylim(-1, 1)
     ax_left.set_zlim(-1, 1)
     ax_left.view_init(elev=15, azim=-20, roll=None)
+        
+    # stokes vector
+    #stokes_vector = ax_left.quiver(0, 0, 0, SV[1], SV[2], SV[3], color="red", arrow_length_ratio=0.1)
 
-    # useful for determining view_init
-    # %matplotlib qt
-    #def update_view(event):
-    #    fig.suptitle(f"elev={ax.elev:.1f}, azim={ax.azim:.1f}, roll={ax.roll:.1f}")
-    #    fig.canvas.draw_idle()
-    #    fig.canvas.mpl_connect("motion_notify_event", update_view)
-    #    fig.canvas.mpl_connect("button_release_event", update_view)
-
-    ax_right.plot(Ex.real, Ey.real)
-    ax_right.set_xlim(-1, 1)
-    ax_right.set_ylim(-1, 1)
+    ### 2D plot
+    ax_right.set_xlim(-1.05, 1.05)
+    ax_right.set_ylim(-1.05, 1.05)
     ax_right.set_box_aspect(1)
     ax_right.set_title('Physical polarization: Re(Ey) vs Re(Ex)')
     ax_right.set_xlabel('Re(Ex)')
@@ -554,4 +547,91 @@ if plot_selection in [1, 4]:
     ax_right.axis('equal')
     ax_right.grid(True, alpha=0.3)
 
+    # points to be traced
+    # every point shall be a unit vector on the sphere
+    path_points = [
+        SV[1:],
+        np.array([0.0, 1.0, 0.0]),
+        np.array([0.0, 0.0, 1.0]),
+        np.array([1.0, 0.0, 0.0]),
+        SV[1:],
+    ]
+
+    ### DISCLAIMER: Most code from this point onwards was heavily AI generated, but thoroughly reviewed and slightly revised
+
+    def normalize(v):
+        v = np.asarray(v, dtype=float)
+        n = np.linalg.norm(v)
+        return v / n if n != 0 else v
+
+    def make_path(points, steps_per_segment=60):
+        points = [normalize(p) for p in points]
+        path = []
+        for p0, p1 in zip(points[:-1], points[1:]):
+            for a in np.linspace(0.0, 1.0, steps_per_segment, endpoint=False):
+                path.append(normalize((1.0 - a) * p0 + a * p1))
+        path.append(points[-1])
+        return np.array(path)
+    
+    path_resolution = 50
+    path = make_path(path_points, steps_per_segment= path_resolution)
+    
+    # 3D path artists
+    path_line, = ax_left.plot([], [], [], color="red", lw=2)
+    current_tip = {"artist": ax_left.quiver(0, 0, 0, *path[0], color="red", arrow_length_ratio=0.1)}
+    current_marker, = ax_left.plot([], [], [], "o", color="red", markersize=5)
+
+    jones_curve, = ax_right.plot([], [], lw=2)
+    jones_marker, = ax_right.plot([], [], "o", markersize=5)
+
+    phase = np.linspace(0.0, 2 * np.pi, 250)
+
+    def jones_ellipse(jv):
+        Ex0, Ey0 = jv
+        return np.real(Ex0 * np.exp(1j * phase)), np.real(Ey0 * np.exp(1j * phase))
+    
+    frame_idx = np.arange(0, len(path))
+    n = len(frame_idx)
+
+    # update animation
+    def update(i):
+        k = frame_idx[i]
+        sv_xyz = path[k]
+
+        # trace the line already visited
+        trace = path[:k + 1]
+        path_line.set_data_3d(trace[:, 0], trace[:, 1], trace[:, 2])
+
+        # move the arrow tip
+        current_tip["artist"].remove()
+        current_tip["artist"] = ax_left.quiver(
+            0, 0, 0, sv_xyz[0], sv_xyz[1], sv_xyz[2],
+            color="red", arrow_length_ratio=0.1
+        )
+        current_marker.set_data_3d([sv_xyz[0]], [sv_xyz[1]], [sv_xyz[2]])
+
+        # convert the current Stokes point back to a Jones vector
+        current_sv = np.array([1.0, sv_xyz[0], sv_xyz[1], sv_xyz[2]], dtype=float)
+        jv = stokes2jones(current_sv)
+
+        ex_curve, ey_curve = jones_ellipse(jv)
+        jones_curve.set_data(ex_curve, ey_curve)
+        jones_marker.set_data([ex_curve[0]], [ey_curve[0]])
+
+        return path_line, current_marker, current_tip["artist"], jones_curve, jones_marker
+
+    ani = animation.FuncAnimation(fig=fig, func=update, frames=len(frame_idx), interval=1000/fps, blit=False)
+
+    # choose output file type
+    match animation_mode:
+        case 2: 
+            print("Saving video animation, please allow a few minutes ...")
+            ani.save(f"{dir_path}/poincare.gif", writer="pillow")
+            plt.close(fig)
+            print(f"Saved in {dir_path}/poincare.gif")
+        case 3:
+            print("Saving video animation, please allow a few minutes ...")
+            ani.save(f"{dir_path}/poincare.mp4", writer="ffmpeg")
+            plt.close(fig)
+            print(f"Saved in {dir_path}/poincare.gif")
     plt.show()
