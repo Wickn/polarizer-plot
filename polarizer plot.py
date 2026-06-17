@@ -438,11 +438,12 @@ if plot_selection in [1, 4]:
 
     # stokes vector
     ax_left.quiver(0, 0, 0, SV[1], SV[2], SV[3], color="red", arrow_length_ratio=0.1)
+    ax_left.quiver(SV[1], SV[2], 0, 0, 0, SV[3], color="red", arrow_length_ratio=0, alpha=0.3, linestyle="--")
 
     # axis
-    ax_left.quiver(-1,  0,  0,  2 * 1,     0,     0, color="k", arrow_length_ratio=0, alpha=0.5)
-    ax_left.quiver( 0, -1,  0,      0, 2 * 1,     0, color="k", arrow_length_ratio=0, alpha=0.5)
-    ax_left.quiver( 0,  0, -1,      0,     0, 2 * 1, color="k", arrow_length_ratio=0, alpha=0.5)
+    ax_left.quiver(-1,  0,  0,  2, 0, 0, color="k", arrow_length_ratio=0, alpha=0.5)
+    ax_left.quiver( 0, -1,  0,  0, 2 ,0, color="k", arrow_length_ratio=0, alpha=0.5)
+    ax_left.quiver( 0,  0, -1,  0, 0, 2, color="k", arrow_length_ratio=0, alpha=0.5)
 
     # circles
     x_xy = r * np.cos(theta)
@@ -539,9 +540,6 @@ if plot_selection in [1, 4]:
     ax_left.set_zlim(-1, 1)
     ax_left.view_init(elev=15, azim=-20, roll=None)
         
-    # stokes vector
-    #stokes_vector = ax_left.quiver(0, 0, 0, SV[1], SV[2], SV[3], color="red", arrow_length_ratio=0.1)
-
     ### 2D plot
     ax_right.set_xlim(-1.05, 1.05)
     ax_right.set_ylim(-1.05, 1.05)
