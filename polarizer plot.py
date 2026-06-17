@@ -464,11 +464,11 @@ if plot_selection in [1, 4]:
     ax_left.plot(x_xz, y_xz, z_xz, label='Parallel to YZ plane', color='blue', alpha=0.25)
 
     # limits
-    ax_left.set_title("Poincaré sphere")
     ax_left.set_box_aspect((1, 1, 1))
     ax_left.set_xlim(-1, 1)
     ax_left.set_ylim(-1, 1)
     ax_left.set_zlim(-1, 1)
+    ax_left.set_title("Poincaré sphere", y=1, pad=0)
     ax_left.view_init(elev=15, azim=-20, roll=None)
 
     # useful for determining view_init
@@ -541,6 +541,7 @@ if plot_selection in [1, 4]:
     ax_left.set_xlim(-1, 1)
     ax_left.set_ylim(-1, 1)
     ax_left.set_zlim(-1, 1)
+    ax_left.set_title("Poincaré sphere", y=1, pad=0)
     ax_left.view_init(elev=15, azim=-20, roll=None)
         
     ### 2D plot
