@@ -35,13 +35,13 @@ match mode:
 
     case 2:
         print("Leave empty for default values\n")
-        plot_selection = int(input("""Choose what plots to display:
+        plot_selection = int(input("""Choose what plots to display: (Default: 1)
                                    \n1: All plots
                                    \n2: 2D polarizations only
                                    \n3: Animated plot only
                                    \n4: Poincaré Sphere only\n""") or 1)
         
-        pre_polar = int(input("""Light polarization:
+        pre_polar = int(input("""Light polarization: (Default: 1)
                             \n1: Right hand circular
                             \n2: Left hand circular
                             \n3: Linear (Horizontal)
@@ -75,7 +75,7 @@ match mode:
 
         # skips having to select a jones matrix when dealing with poincaré sphere
         if plot_selection in [1, 2, 3]:
-            post_polar = int(input("""Polarizer:
+            post_polar = int(input("""Polarizer: (Default: 4)
                                 \n1: Right hand circular
                                 \n2: Left hand circular
                                 \n3: Linear (Horizontal)
@@ -115,12 +115,12 @@ match mode:
                         [np.cos(phi_custom)*np.sin(phi_custom), np.sin(phi_custom)*np.sin(phi_custom)]])
 
         if plot_selection in [1, 3, 4]:
-            animation_mode = int(input("""Choose animation output: 
+            animation_mode = int(input("""Choose animation output: (Default: 1)
                                     \n1: MatPlotLib interactive
                                     \n2: .gif (Need package Pillow)
                                     \n3: .mp4 (Need ffmpeg in PATH)\n""") or 1)
 
-            panning = int(input("""Animation pan?
+            panning = int(input("""Animation pan? (Default: 1)
                                 \n1: No pan
                                 \n2: Pan\n""") or 1)
             # poincare sphere does not support panning
