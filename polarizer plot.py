@@ -4,6 +4,7 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib.patches import FancyArrowPatch
 
 import matplotlib 
 matplotlib.rcParams['animation.embed_limit'] = 2**128
@@ -72,44 +73,46 @@ match mode:
                 (np.cos(psi_custom)*np.cos(chi_custom) - 1j*np.sin(psi_custom)*np.sin(chi_custom)), 
                 (np.sin(psi_custom)*np.cos(chi_custom) + 1j*np.cos(psi_custom)*np.sin(chi_custom)))
 
-        post_polar = int(input("""Polarizer:
-                            \n1: Right hand circular
-                            \n2: Left hand circular
-                            \n3: Linear (Horizontal)
-                            \n4: Linear (Vertical)
-                            \n5: Linear (45 degrees)
-                            \n6: Linear (-45 degrees)
-                            \n7: Linear (Custom rotation)\n""") or 4)
-        match post_polar:
-            case 1: # right hand circular
-                JM = 1/2 * np.array([
-                    [1, 1j],
-                    [-1j, 1]]) 
-            case 2: # left hand circular
-                JM = 1/2 * np.array([
-                    [1, -1j],
-                    [1j, 1]]) 
-            case 3: # linear, horizsontal
-                JM = np.array([
-                    [1, 0],
-                    [0, 0]]) 
-            case 4: # linear, vertical
-                JM = np.array([
-                    [0, 0],
-                    [0, 1]])
-            case 5: # linear, 45 degrees
-                JM = 1/2 * np.array([
-                    [1, 1],
-                    [1, 1]]) 
-            case 6: # linear, -45 degrees
-                JM = 1/2 * np.array([
-                    [1, -1],
-                    [-1, 1]])
-            case 7: # linear, custom rotation
-                phi_custom = np.deg2rad(int(input("Enter rotation in degrees: ") or 30))
-                JM = np.array([
-                    [np.cos(phi_custom)*np.cos(phi_custom), np.cos(phi_custom)*np.sin(phi_custom)],
-                    [np.cos(phi_custom)*np.sin(phi_custom), np.sin(phi_custom)*np.sin(phi_custom)]])
+        # skips having to select a jones matrix when dealing with poincaré sphere
+        if plot_selection in [1, 2, 3]:
+            post_polar = int(input("""Polarizer:
+                                \n1: Right hand circular
+                                \n2: Left hand circular
+                                \n3: Linear (Horizontal)
+                                \n4: Linear (Vertical)
+                                \n5: Linear (45 degrees)
+                                \n6: Linear (-45 degrees)
+                                \n7: Linear (Custom rotation)\n""") or 4)
+            match post_polar:
+                case 1: # right hand circular
+                    JM = 1/2 * np.array([
+                        [1, 1j],
+                        [-1j, 1]]) 
+                case 2: # left hand circular
+                    JM = 1/2 * np.array([
+                        [1, -1j],
+                        [1j, 1]]) 
+                case 3: # linear, horizsontal
+                    JM = np.array([
+                        [1, 0],
+                        [0, 0]]) 
+                case 4: # linear, vertical
+                    JM = np.array([
+                        [0, 0],
+                        [0, 1]])
+                case 5: # linear, 45 degrees
+                    JM = 1/2 * np.array([
+                        [1, 1],
+                        [1, 1]]) 
+                case 6: # linear, -45 degrees
+                    JM = 1/2 * np.array([
+                        [1, -1],
+                        [-1, 1]])
+                case 7: # linear, custom rotation
+                    phi_custom = np.deg2rad(int(input("Enter rotation in degrees: ") or 30))
+                    JM = np.array([
+                        [np.cos(phi_custom)*np.cos(phi_custom), np.cos(phi_custom)*np.sin(phi_custom)],
+                        [np.cos(phi_custom)*np.sin(phi_custom), np.sin(phi_custom)*np.sin(phi_custom)]])
 
         if plot_selection in [1, 3, 4]:
             animation_mode = int(input("""Choose animation output: 
@@ -150,9 +153,11 @@ Ey = E0y * np.exp(1j*(phi + phi_y))
 # polarized light
 JV = np.array([Ex, Ey])
 
-E_polarized = JM.dot(JV)
-Epx = E_polarized[0]
-Epy = E_polarized[1]
+# the poincaré sphere doesn't use jones matrix
+if plot_selection in [1, 2, 3]:
+    E_polarized = JM.dot(JV)
+    Epx = E_polarized[0]
+    Epy = E_polarized[1]
 
 # jones vector to stokes parameters
 def jones2stokes(Ex, Ey):
@@ -481,7 +486,7 @@ if plot_selection in [1, 4]:
     ax_right.axis('equal')
     ax_right.grid(True, alpha=0.3)
 
-    plt.show(block=True)
+    plt.show(block=False)
 
 # animated poincaré and stokes
 if plot_selection in [1, 4]:
@@ -491,7 +496,7 @@ if plot_selection in [1, 4]:
 
     ax_left = fig.add_subplot(gs[0, 0], projection="3d")
     ax_right = fig.add_subplot(gs[0, 1])
-
+    ax_right.set_autoscale_on(False)
     ### 3D plot
     # sphere paramters
     theta = np.linspace(0, 2 * np.pi, 120)
@@ -541,10 +546,10 @@ if plot_selection in [1, 4]:
     ax_right.set_xlim(-1.05, 1.05)
     ax_right.set_ylim(-1.05, 1.05)
     ax_right.set_box_aspect(1)
+    ax_right.set_aspect("equal", adjustable="box")
     ax_right.set_title('Physical polarization: Re(Ey) vs Re(Ex)')
     ax_right.set_xlabel('Re(Ex)')
     ax_right.set_ylabel('Re(Ey)')
-    ax_right.axis('equal')
     ax_right.grid(True, alpha=0.3)
 
     # points to be traced
@@ -553,6 +558,7 @@ if plot_selection in [1, 4]:
         SV[1:],
         np.array([0.0, 1.0, 0.0]),
         np.array([0.0, 0.0, 1.0]),
+        np.array([0.0, -1.0, 0]),
         np.array([1.0, 0.0, 0.0]),
         SV[1:],
     ]
@@ -581,14 +587,37 @@ if plot_selection in [1, 4]:
     current_tip = {"artist": ax_left.quiver(0, 0, 0, *path[0], color="red", arrow_length_ratio=0.1)}
     current_marker, = ax_left.plot([], [], [], "o", color="red", markersize=5)
 
+    # 2D path artists
     jones_curve, = ax_right.plot([], [], lw=2)
     jones_marker, = ax_right.plot([], [], "o", markersize=5)
+
+    jones_arrow_length = 0.1
+    jones_arrow = FancyArrowPatch(
+        (0, 0), (0, 0),
+        arrowstyle="->",
+        mutation_scale=18,
+        color="red",
+        linewidth=2,
+        zorder=10,
+    )
+    ax_right.add_patch(jones_arrow)
 
     phase = np.linspace(0.0, 2 * np.pi, 250)
 
     def jones_ellipse(jv):
         Ex0, Ey0 = jv
         return np.real(Ex0 * np.exp(1j * phase)), np.real(Ey0 * np.exp(1j * phase))
+    
+    def update_jones_arrow(arrow, x0, y0, x1, y1, length):
+        direction = np.array([x1 - x0, y1 - y0], dtype=float)
+        norm = np.linalg.norm(direction)
+        if norm == 0:
+            return
+        direction /= norm
+        arrow.set_positions(
+            (x0, y0),
+            (x0 + direction[0] * length, y0 + direction[1] * length),
+    )
     
     frame_idx = np.arange(0, len(path))
     n = len(frame_idx)
@@ -614,11 +643,17 @@ if plot_selection in [1, 4]:
         current_sv = np.array([1.0, sv_xyz[0], sv_xyz[1], sv_xyz[2]], dtype=float)
         jv = stokes2jones(current_sv)
 
-        ex_curve, ey_curve = jones_ellipse(jv)
-        jones_curve.set_data(ex_curve, ey_curve)
-        jones_marker.set_data([ex_curve[0]], [ey_curve[0]])
+        Ex_curve, Ey_curve = jones_ellipse(jv)
 
-        return path_line, current_marker, current_tip["artist"], jones_curve, jones_marker
+        jones_curve.set_data(Ex_curve, Ey_curve)
+        
+        x0, y0 = Ex_curve[0], Ey_curve[0]
+        x1, y1 = Ex_curve[1], Ey_curve[1]
+        update_jones_arrow(jones_arrow, x0, y0, x1, y1, jones_arrow_length)
+
+        #jones_marker.set_data([Ex_curve[0]], [Ey_curve[0]])
+        #return path_line, current_marker, current_tip["artist"], jones_curve, jones_marker
+        return path_line, current_marker, current_tip["artist"], jones_curve
 
     ani = animation.FuncAnimation(fig=fig, func=update, frames=len(frame_idx), interval=1000/fps, blit=False)
 
