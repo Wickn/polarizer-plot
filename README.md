@@ -19,7 +19,6 @@ Visualize the Poincaré Sphere through Stokes Parameters.
 - Allows exporting to .gif and .mp4 formats. (Note: .mp4 export requires ffmpeg in PATH)
 ## Usage
 Simply run the script "polarizer plot.py" and indicate your desired settings when prompted.
-The notebook file is primarily for testing. The most up to date version is the .py file.
 
 ## Examples
 ### Polarizer plots with default settings:
