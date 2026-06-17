@@ -123,8 +123,9 @@ match mode:
             panning = int(input("""Animation pan?
                                 \n1: No pan
                                 \n2: Pan\n""") or 1)
-
-            if panning == 2: pan_span = float(input("Pan span (Default 10.0): ") or 10.0)
+            # poincare sphere does not support panning
+            if plot_selection not in [4]:
+                if panning == 2: pan_span = float(input("Pan span (Default 10.0): ") or 10.0)
 
             fps = int(input("Framerate (Default 50fps): ") or 50)
 
