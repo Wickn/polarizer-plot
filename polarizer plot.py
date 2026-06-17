@@ -131,6 +131,7 @@ match mode:
             step = int(input("Animation speed (Default 4): ") or 4)
 
 # parameters
+# technically unnecessary, as most values eventually gets normalized
 phi_x, phi_y = 0, 0             # phase retarders
 c = 300000000                   # m/s
 wavelength = 1550 * 1e-9        # nm
@@ -181,10 +182,11 @@ def stokes2jones(SV):
         Ex = (S2 - 1j * S3) / (2 * Ey) if not np.isclose(Ey, 0.0) else 0.0j
 
     return np.sqrt(S0) * np.array([Ex, Ey], dtype=complex)
-jonesreconstructed = stokes2jones(SV)
 
 # test cases to prove the black magic fuckery works somehow
-"""print(f"Ex and Ey in jones: {E0x, E0y}")
+"""
+jonesreconstructed = stokes2jones(SV)
+print(f"Ex and Ey in jones: {E0x, E0y}")
 print(f"stokes paramter: {SV}")
 print(f"Ex and Ey reconstructed: {jonesreconstructed[0], jonesreconstructed[1]}")
 print(f"stokes reconstructed: {jones2stokes(jonesreconstructed[0], jonesreconstructed[1])}")
@@ -322,8 +324,8 @@ if plot_selection in [1, 3]:
     ax_left.quiver(0, 0, 0, 0, 0, zmax, color="k", arrow_length_ratio=0.05, alpha=0.5)
 
     # represents the polarizer
-    x_plane = np.linspace(-0.75, 0.75, 2)
-    y_plane = np.linspace(-0.75, 0.75, 2)
+    x_plane = np.linspace(-1, 1, 2)
+    y_plane = np.linspace(-1, 1, 2)
     X_plane, Y_plane = np.meshgrid(x_plane, y_plane)
     Z_plane = np.ones_like(X_plane)
 
@@ -462,6 +464,7 @@ if plot_selection in [1, 4]:
     ax_left.plot(x_xz, y_xz, z_xz, label='Parallel to YZ plane', color='blue', alpha=0.25)
 
     # limits
+    ax_left.set_title("Poincaré sphere")
     ax_left.set_box_aspect((1, 1, 1))
     ax_left.set_xlim(-1, 1)
     ax_left.set_ylim(-1, 1)
